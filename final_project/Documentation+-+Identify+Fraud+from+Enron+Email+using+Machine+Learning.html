@@ -11919,7 +11919,7 @@ The scatterplot bellow shows the situation after removing the outlier.</p>
 <h1 id="2.-Feature-Selection-and-Engineering">2. Feature Selection and Engineering<a class="anchor-link" href="#2.-Feature-Selection-and-Engineering">&#182;</a></h1><h2 id="Feature-Egineering">Feature Egineering<a class="anchor-link" href="#Feature-Egineering">&#182;</a></h2><p>After removing the outliers from the Salary vs Bonus scatter plot, two other important features were identified. Namely "from_poi_to_this_person" and "from_this_person_to_poi". Since there no strong pattern was obesrved two new features were created:</p>
 <ul>
 <li>fraction_from_poi - represents the fraction between the number of emails from POIs and the total number of from messages</li>
-<li>farction_to_poi - represents the fraction between the number of emails to POIs and the total number of to messages</li>
+<li>fraction_to_poi - represents the fraction between the number of emails to POIs and the total number of to messages</li>
 </ul>
 <p>The scatterplot between the two new created features can be seen below.
 <img src="scaled.png" alt="Messages to and from POIs"></p>
@@ -11940,24 +11940,39 @@ The scatterplot bellow shows the situation after removing the outlier.</p>
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Feature-Selection">Feature Selection<a class="anchor-link" href="#Feature-Selection">&#182;</a></h2><p>The next step was to select the features that will be used further in the algorithm. Therefore a forests of trees was used to evaluate the importance of the features. The top ten features based on their importance was selected. Moreover, some features considered importantant and relevant for the analysis were manually added. The final list of selected features is:</p>
+<h2 id="Feature-Scaling">Feature Scaling<a class="anchor-link" href="#Feature-Scaling">&#182;</a></h2><p>The two newly created features "fraction_from_poi" and "fraction_to_poi" were scaled. However, further feature scaling was not performed since neither RandomForest nor AdaBoost require it.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Feature-Selection">Feature Selection<a class="anchor-link" href="#Feature-Selection">&#182;</a></h2><p>The next step was to select the features that will be used further in the algorithm. Therefore a forests of trees was used to evaluate the importance of the features.</p>
 <ol>
-<li>total_payments (0.113846)</li>
-<li>restricted_stock_deferred (0.090760)</li>
-<li>fraction_from_poi (0.089054)</li>
-<li>director_fees (0.075426)</li>
-<li>poi (0.066242)</li>
-<li>total_stock_value (0.063815)</li>
-<li>deferral_payments (0.061640)</li>
-<li>exercised_stock_options (0.061081)</li>
-<li>deferred_income (0.058439)</li>
-<li>bonus (0.049589)</li>
-<li>salary (0.031417)</li>
-<li>expenses (0.014175)</li>
-<li>from_poi_to_this_person (0.000512)</li>
-<li>fraction_to_poi</li>
+<li>feature exercised_stock_options (0.113846)</li>
+<li>feature total_stock_value (0.090760)</li>
+<li>feature fraction_to_poi (0.089054)</li>
+<li>feature deferred_income (0.075426)</li>
+<li>feature salary (0.066242)</li>
+<li>feature expenses (0.063815)</li>
+<li>feature total_payments (0.061640)</li>
+<li>feature bonus (0.061081)</li>
+<li>feature long_term_incentive (0.058439)</li>
+<li>feature restricted_stock (0.049589)</li>
+<li>feature shared_receipt_with_poi (0.049137)</li>
+<li>feature from_poi_to_this_person (0.045380)</li>
+<li>feature from_this_person_to_poi (0.039375)</li>
+<li>feature to_messages (0.031417)</li>
+<li>feature fraction_from_poi (0.028978)</li>
+<li>feature from_messages (0.027333)</li>
+<li>feature deferral_payments (0.027270)</li>
+<li>feature loan_advances (0.014175)</li>
+<li>feature restricted_stock_deferred (0.006530)</li>
+<li>feature director_fees (0.000512)</li>
 </ol>
-<p>From the engineered features, fraction_from_poi was included in the selected list of fearures since it ranked third based on the importance of the features. Initially, the econd ingineered feature, fraction_to_poi, was not included in the list because it had a very low (the lowest) importance score. However, by adding the feature to the list, the accuracy using the AdaBoost classifier improved from 0.819 to 0.847</p>
+<p>For the next steps of the analysis it has been decided to select the top 10 features based on their importance scores. It can be observed that also the newly created feature "fraction_to_poi" it is included in the list, ranking 3rd in the list.</p>
 
 </div>
 </div>
@@ -12036,7 +12051,8 @@ The scatterplot bellow shows the situation after removing the outlier.</p>
 </tbody>
 </table>
 <p>Since the reacall scores were far from the desired level (&gt;0.3), the parameters for the AdaBoost clasifier will be tuned next.</p>
-<h3 id="AdaBoost-parameter-tuning">AdaBoost parameter tuning<a class="anchor-link" href="#AdaBoost-parameter-tuning">&#182;</a></h3><p>The first parameter tuning performed for AdaBoost was changing the algorithm from SAMME.R to SAMME.</p>
+<h3 id="AdaBoost-parameter-tuning">AdaBoost parameter tuning<a class="anchor-link" href="#AdaBoost-parameter-tuning">&#182;</a></h3><p>It has been observed that running AdaBoost with the top 10 features had a negative impact on performance, having a recall below 0.3. Therefore it has been decided to decrease the number of features one by one. The best results were obtained with the top 6 features.</p>
+<p>Since the recall was not at the desired level, furtehr parameters tuning was performed.</p>
 <table>
 <thead><tr>
 <th>Parameters</th>
@@ -12047,68 +12063,32 @@ The scatterplot bellow shows the situation after removing the outlier.</p>
 </thead>
 <tbody>
 <tr>
-<td>algorithm = SAMME.R</td>
-<td>0.83027</td>
-<td>0.33231</td>
-<td>0.2705</td>
+<td>n-estimator = 10</td>
+<td>0.85427</td>
+<td>0.42159</td>
+<td>0.2500</td>
 </tr>
 <tr>
-<td>algorithm = SAMME</td>
-<td>0.84280</td>
-<td>0.36460</td>
-<td>0.2410</td>
+<td>n-estimator = 15</td>
+<td>0.85040</td>
+<td>0.41801</td>
+<td>0.3110</td>
+</tr>
+<tr>
+<td>n-estimator = 20</td>
+<td>0.85200</td>
+<td>0.43284</td>
+<td>0.3545</td>
+</tr>
+<tr>
+<td>n-estimator = 25</td>
+<td>0.85807</td>
+<td>0.46903</td>
+<td>0.3805</td>
 </tr>
 </tbody>
 </table>
-<p>In can be observed that whil the precision increased, the recall decreased. Therefore the n-estimator parameter was selected for tuning. The default value for this parameter is 50, and the value was gradually incraesed in oredr to obtain the desired recall level.</p>
-<table>
-<thead><tr>
-<th>Parameters</th>
-<th>Accuracy</th>
-<th>Precision</th>
-<th>Recall</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>n-estimator = 50</td>
-<td>0.83027</td>
-<td>0.33231</td>
-<td>0.2705</td>
-</tr>
-<tr>
-<td>n-estimator = 100</td>
-<td>0.8418</td>
-<td>0.3769</td>
-<td>0.2855</td>
-</tr>
-<tr>
-<td>n-estimator = 150</td>
-<td>0.846</td>
-<td>0.39427</td>
-<td>0.289</td>
-</tr>
-<tr>
-<td>n-estimator = 200</td>
-<td>0.84687</td>
-<td>0.39905</td>
-<td>0.2935</td>
-</tr>
-<tr>
-<td>n-estimator = 300</td>
-<td>0.84573</td>
-<td>0.39547</td>
-<td>0.2970</td>
-</tr>
-<tr>
-<td>n-estimator = 600</td>
-<td>0.84573</td>
-<td>0.39671</td>
-<td>0.3015</td>
-</tr>
-</tbody>
-</table>
-<p>The recall score reached 0.30 when the n-estimator was 600. Therefore, this is the selected model.</p>
+<p>The recall score exceeded 0.30 when the n-estimator was 15. When increasing the value of the n_estimator parameter, the recall value increased, but the time required to run cross validation was increased over 1 minute. Therefore, the selected model is AdaBoost classifier with the n_estimator = 15.</p>
 
 </div>
 </div>
@@ -12131,13 +12111,13 @@ If this partion of the data is not perfomed, and the model trains and tests on t
 <tbody>
 <tr>
 <td>AdaBoost</td>
-<td>0.84573</td>
-<td>0.39671</td>
-<td>0.3015</td>
+<td>0.85040</td>
+<td>0.41801</td>
+<td>0.3110</td>
 </tr>
 </tbody>
 </table>
-<p>The accuracy, represents the number of correct predictions out of the total predicions made by the model. In this case, the model predicted correctly in aprox. 85% of the cases. The precision shows the percentage of item considered relevant. Therfore, considering all the items identified as POIs, aprox. 40% of the were actually POIs. A 30% recall, means that from all the POIs from the dataset the model correctly identified 30% of them.</p>
+<p>The accuracy, represents the number of correct predictions out of the total predicions made by the model. In this case, the model predicted correctly in aprox. 85% of the cases. The precision shows the percentage of item considered relevant. Therfore, considering all the items identified as POIs, aprox. 42% of the were actually POIs. A 31% recall, means that from all the POIs from the dataset the model correctly identified 31% of them.</p>
 
 </div>
 </div>

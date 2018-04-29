@@ -140,10 +140,11 @@ indices = np.argsort(importances)[::-1]
 selected_features = []
 # Print the feature ranking
 print("Feature ranking:")
+print range(X.shape[1])
 
 for f in range(X.shape[1]):
-    print("%d. feature %s (%f)" % (f + 1, features_list[indices[f]], importances[indices[f]]))
-    selected_features.append(features_list[indices[f]])
+    print("%d. feature %s (%f)" % (f + 1, features_list[indices[f]+1], importances[indices[f]]))
+    selected_features.append(features_list[indices[f]+1])
 
 # Plot the feature importances of the forest
 plt.figure()
@@ -154,8 +155,8 @@ plt.xticks(range(X.shape[1]), indices)
 plt.xlim([-1, X.shape[1]])
 plt.savefig('Features.pdf')
 
-#Select top 10 features
-selected_features = selected_features[:10]
+#Select top 7 features
+selected_features = selected_features[:6]
 
 
 
@@ -166,10 +167,7 @@ selected_features = selected_features[:10]
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
 #Selected feature list starting with poi
-select_features = ['poi', 'total_payments', 'restricted_stock_deferred', 'fraction_from_poi',
-                   'director_fees', 'total_stock_value', 'deferral_payments', 'exercised_stock_options',
-                   'deferred_income', 'bonus', 'salary', 'expenses', 'from_poi_to_this_person', 'fraction_to_poi']
-
+features_list = ['poi'] + selected_features
 
 #######################################################################
 #Testing classifiers and selecting the final one
@@ -178,7 +176,7 @@ select_features = ['poi', 'total_payments', 'restricted_stock_deferred', 'fracti
 ### Extract selected features and labels from dataset
 from sklearn.cross_validation import train_test_split
 
-data = featureFormat(my_dataset, select_features, sort_keys = True)
+data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
 #Spliting the dataset into test and training data
@@ -214,11 +212,11 @@ from sklearn.metrics import accuracy_score
 #print "Accuracy RF:", accuracy
 
 from sklearn.ensemble import AdaBoostClassifier
-clf = AdaBoostClassifier()
-clf = clf.fit(features_train, labels_train)
-pred = clf.predict(features_test)
-accuracy = accuracy_score(pred, labels_test)
-print "Accuracy AB:", accuracy
+#clf = AdaBoostClassifier()
+#clf = clf.fit(features_train, labels_train)
+#pred = clf.predict(features_test)
+#accuracy = accuracy_score(pred, labels_test)
+#print "Accuracy AB:", accuracy
 
 ## Task 5: Tune your classifier to achieve better than .3 precision and recall
 ### using our testing script. Check the tester.py script in the final project
@@ -232,11 +230,13 @@ from sklearn.cross_validation import train_test_split
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
 
-clf = AdaBoostClassifier(n_estimators=600)
+clf = AdaBoostClassifier(n_estimators=15)
 clf = clf.fit(features_train, labels_train)
 pred = clf.predict(features_test)
 accuracy = accuracy_score(pred, labels_test)
 print "Accuracy AB:", accuracy
+
+
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
